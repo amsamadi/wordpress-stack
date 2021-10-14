@@ -1,0 +1,83 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: poste
+  labels:
+    app.k8s.io/name: poste
+spec:
+  type: ClusterIP
+  clusterIP: None
+  selector:
+    app.k8s.io/name: poste
+  ports:
+    - port: 80
+      name: http
+    - port: 443
+      name: https
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: poste
+  labels:
+    app.k8s.io/name: poste
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.k8s.io/name: poste
+  serviceName: poste
+  volumeClaimTemplates:
+    - metadata:
+        name: poste-data
+        labels:
+          app.k8s.io/name: poste
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 2Gi
+  template:
+    metadata:
+      labels:
+        app.k8s.io/name: poste
+    spec:
+      containers:
+        - name: poste
+          image: analogic/poste.io:2
+          env:
+            - name: TZ
+              value: Asia/Tehran
+            - name: HTTPS
+              value: "OFF"
+          ports:
+            - containerPort: 80
+            - containerPort: 443
+          volumeMounts:
+            - name: poste-data
+              mountPath: /data
+      volumes: 
+        - name: poste-data
+          persistentVolumeClaim:
+            claimName: poste-data
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: poste
+  labels:
+    app.k8s.io/name: poste
+spec:
+  rules:
+    - host: mail.dwsclass.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: poste
+                port:
+                  number: 80
+

@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: filebrowser
+  labels:
+    app.k8s.io/name: filebrowser
+spec:
+  type: ClusterIP
+  selector:
+    app.k8s.io/name: filebrowser
+  ports:
+    - port: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: filebrowser
+  labels:
+    app.k8s.io/name: filebrowser
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.k8s.io/name: filebrowser
+  template:
+    metadata:
+      labels:
+        app.k8s.io/name: filebrowser
+    spec:  
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app.k8s.io/name: wordpress
+              topologyKey: kubernetes.io/hostname    
+      containers:
+        - name: filebrowser
+          image: filebrowser/filebrowser:v2
+          volumeMounts:
+            - name: wordpress-data
+              mountPath: /srv
+          ports:
+            - containerPort: 80     
+      volumes:
+        - name: wordpress-data
+          persistentVolumeClaim:
+            claimName: wordpress-data-wordpress-0
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: filebrowser
+  labels:
+    app.k8s.io/name: filebrowser
+spec:
+  rules:
+    - host: file.dwsclass.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: filebrowser       
+                port:
+                  number: 80
