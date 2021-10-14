@@ -15,6 +15,34 @@ spec:
     - port: 443
       name: https
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mailserver
+  labels:
+    app.k8s.io/name: poste
+spec:
+  type: LoadBalancer
+  selector:
+    app.k8s.io/name: poste
+  ports:
+    - port: 25
+      name: smtp
+    - port: 110
+      name: pop3
+    - port: 143
+      name: imap
+    - port: 465
+      name: smtps
+    - port: 587
+      name: msa
+    - port: 993
+      name: imaps
+    - port: 995
+      name: pop3s
+    - port: 4190
+      name: sieve
+---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -54,6 +82,14 @@ spec:
           ports:
             - containerPort: 80
             - containerPort: 443
+            - containerPort: 25
+            - containerPort: 110
+            - containerPort: 143
+            - containerPort: 465
+            - containerPort: 587
+            - containerPort: 993
+            - containerPort: 995
+            - containerPort: 4190
           volumeMounts:
             - name: poste-data
               mountPath: /data
