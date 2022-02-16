@@ -106,7 +106,7 @@ metadata:
     app.k8s.io/name: poste
 spec:
   rules:
-    - host: mail.dwsclass.io
+    - host: mail.test.app
       http:
         paths:
           - path: /
