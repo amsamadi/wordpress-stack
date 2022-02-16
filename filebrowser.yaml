@@ -55,7 +55,7 @@ metadata:
     app.k8s.io/name: filebrowser
 spec:
   rules:
-    - host: file.dwsclass.io
+    - host: file.test.app
       http:
         paths:
           - path: /
