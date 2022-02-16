@@ -44,7 +44,7 @@ metadata:
     app.k8s.io/name: phpmyadmin
 spec:
   rules:
-    - host: phpmyadmin.dwsclass.io
+    - host: phpmyadmin.test.app
       http:
         paths:
           - path: /
